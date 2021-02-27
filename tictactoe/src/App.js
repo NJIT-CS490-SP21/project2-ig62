@@ -9,6 +9,9 @@ const socket = io(); // Connects to socket connection
 function App() {
   const [showLogin, setShowLogin] = useState(true);
   const usernameRef = useRef(null);
+  const [playerX, setPlayerX] = useState(null);
+  const [playerO, setPlayerO] = useState(null);
+  // const [spectList, setSpectList] = useState([]);
   
   function onLogin() {
     setShowLogin((prevShowLogin) => {
@@ -23,8 +26,12 @@ function App() {
     socket.on('user', (data) => {
       console.log('Login even received!');
       console.log(data);
+      setPlayerX(data.playerX);
+      setPlayerO(data.playerO);
+      // const newSpectList = data.spectators;
+      // setSpectList(spectList.push(...newSpectList));
     });
-  }, []);
+  }, [playerO, playerX]);
   
   
   return (
@@ -38,6 +45,10 @@ function App() {
           <button onClick={() => onLogin()}>Login</button>
         </div>
       </div> : null }
+      <div>
+        <h1> Player X: { playerX } </h1>
+        <h1> Player O: { playerO }</h1>
+      </div>
       <div>
         <Board />
       </div>
