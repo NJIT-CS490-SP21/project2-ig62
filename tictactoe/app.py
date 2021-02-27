@@ -16,8 +16,10 @@ socketio = SocketIO(
     manage_session=False
 )
 
-@app.route('/', defaults={"filename": "index.html"})
+userList = []
+specList = []
 
+@app.route('/', defaults={"filename": "index.html"})
 @app.route('/<path:filename>')
 def index(filename):
     return send_from_directory('./build', filename)
@@ -29,6 +31,27 @@ def on_connect():
 @socketio.on('disconnect')
 def on_disconnect():
     print('User disconnected!')
+
+@socketio.on('board')
+def on_board(data):
+    print(str(data))
+    socketio.emit('board', data, broadcast=True, include_self=False)
+
+@socketio.on('user')
+def on_user(data):
+    print(str(data))
+    userList.append(data['username'])
+    print(userList)
+    if len(userList) == 1:
+        socketio.emit('user', {'playerX': userList[0]}, broadcast=True, include_self=False)
+    if len(userList) == 2:
+        socketio.emit('user', {'playerX': userList[0], 'playerO': userList[1]}, broadcast=True, include_self=False)
+    if len(userList) > 2:
+        for i in range(2, len(userList)):
+            if userList[i] not in specList:
+                specList.append(userList[i])
+        socketio.emit('user', {'playerX': userList[0], 'playerO': userList[1], 'spectators': specList}, broadcast=True, include_self=False)
+    
     
 if __name__ == "__main__":
     socketio.run(
