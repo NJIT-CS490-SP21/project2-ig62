@@ -9,14 +9,11 @@ const socket = io(); // Connects to socket connection
 function Board(){
     const [board, setBoard] = useState(Array(9).fill(null));
     const [xNext, setX] = useState(true);
+ 
     
 
     function handleBoxClick(e, index){
         e.preventDefault();
-        // const newBoard = [...board];
-        // newBoard[index] = xNext ? "X" : "O";
-        // setBoard(newBoard);
-        // setX(!xNext);
         socket.emit('board', { message: "Player clicked box " + index, index: index });
     };
     
