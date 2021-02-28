@@ -21,17 +21,26 @@ function App() {
       return !prevShowLogin;
     });
   }
-  
+  // has side effect; multiple login events
   useEffect(() => {
     socket.on('user', (data) => {
-      console.log('Login even received!');
-      console.log(data);
-      setPlayerX(data.playerX);
-      setPlayerO(data.playerO);
-      const newSpectList = data.spectators;
-      setSpectList(spectList.push(...newSpectList));
+      console.log('Login event received!');
+      if(playerX === null){
+        setPlayerX(data.playerX);
+        console.log(data);
+      }
+      if(playerO === null){
+        setPlayerO(data.playerO);
+        console.log(data);
+      }
+      if(data.spectators) {
+        const newSpectList = data.spectators;
+        const newList = [...spectList];
+        newList.splice(0, newList.length, ...newSpectList);
+        setSpectList(newList);
+      }
     });
-  }, [playerX, playerO]);
+  }, [playerX, playerO, spectList]);
   
   
   return (
@@ -50,11 +59,7 @@ function App() {
         <h1> Player O: { playerO }</h1>
       </div>
       <div>
-        <Board />
-      </div>
-      <div><button> Reset </button></div>
-      <div>
-        {spectList}
+        <Board spectList={spectList} usernameRef={usernameRef}/>
       </div>
     </div>
   );
