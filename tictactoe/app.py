@@ -37,22 +37,25 @@ def on_board(data):
     print(str(data))
     socketio.emit('board', data, broadcast=True, include_self=True)
 
+@socketio.on('reset')
+def on_reset(data):
+    socketio.emit('reset', {'message': 'Resetting Game'}, broadcast=True, include_self=True)
+
 @socketio.on('user')
 def on_user(data):
     print(str(data))
     if data['username'] not in userList:
         userList.append(data['username'])
-    print(userList)
     if len(userList) == 1:
-        socketio.emit('user', {'playerX': userList[0]}, broadcast=True, include_self=True)
-    if len(userList) == 2:
-        socketio.emit('user', {'playerX': userList[0], 'playerO': userList[1]}, broadcast=True, include_self=True)
-    if len(userList) > 2:
+        socketio.emit('playerX', {'playerX': userList[0], 'username': data['username']}, broadcast=True, include_self=True)
+    elif len(userList) == 2:
+        socketio.emit('playerO', {'playerO': userList[1], 'username': data['username']}, broadcast=True, include_self=True)
+    else:
         for i in range(2, len(userList)):
             if userList[i] not in specList:
                 specList.append(userList[i])
         print("Spect: " + str(specList))
-        socketio.emit('user', {'playerX': userList[0], 'playerO': userList[1], 'spectators': specList}, broadcast=True, include_self=True)
+        socketio.emit('spectators', {'spectators': specList}, broadcast=True, include_self=True)
     
     
 if __name__ == "__main__":
