@@ -87,7 +87,7 @@ function Game({username}) {
                 <p> Player X : { playerX } </p>
                 <p> Player O : { playerO } </p>
                 <p>{ winner ? 'Winner: ' + winner : 'Next Player: ' + (xNext ? 'X' : 'O')}</p>
-                { isSpect(username) ?
+                { !isSpect(username) ?
                 <p>{ winner ? <button onClick={ handleClear }> Play Again </button> : <button onClick={ handleClear }> Reset </button> }</p> : null }
                 <p> Spectators:</p>
                 { spectList.map((user, i) => ( <p> { user } </p> )) }
