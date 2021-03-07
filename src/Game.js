@@ -80,6 +80,13 @@ function Game({username}) {
         });
     }, [spectList])
     
+    useEffect(() => { 
+        socket.on('user_list', data => {
+            console.log('User list event received!');
+            console.log(data)
+        });
+    }, [])
+    
     return (
         <div className='container'>
             <h1> Welcome {username} </h1>

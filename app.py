@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-from models import Person
+import models
 db.create_all()
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -38,6 +38,12 @@ def index(filename):
 @socketio.on('connect')
 def on_connect():
     print('User connected!')
+    all_users = models.Person.query.all()
+    users = []
+    for user in all_users:
+        users.append(user.username)
+    print(users)
+    socketio.emit('user_list', {'users': users})
 
 @socketio.on('disconnect')
 def on_disconnect():
