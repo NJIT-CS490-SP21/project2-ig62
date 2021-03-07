@@ -36,6 +36,7 @@ def on_disconnect():
 def on_board(data):
     print(str(data))
     socketio.emit('board', data, broadcast=True, include_self=True)
+    socketio.emit('next', data, broadcast=True, include_self=True)
 
 @socketio.on('reset')
 def on_reset(data):

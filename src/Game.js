@@ -50,6 +50,7 @@ function Game({username}) {
             setXNext(!xNext);
         })
     }, [board, xNext, winner])
+    
         
     useEffect(() => {     
         socket.on('reset', data => {
@@ -75,7 +76,7 @@ function Game({username}) {
     useEffect(() => { 
         socket.on('spectators', data => {
             const arr = data.spectators;
-            setSpectList(prevSpectList => [...prevSpectList, arr[arr.length - 1]]);
+            setSpectList(arr);
         });
     }, [spectList])
     
