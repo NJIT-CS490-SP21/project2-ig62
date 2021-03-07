@@ -16,7 +16,10 @@ function Game({username}) {
     const[xNext, setXNext] = useState(true);
     const[playerX, setPlayerX] = useState(null);
     const[playerO, setPlayerO] = useState(null);
+    const[xScore, setXScore] = useState(null);
+    const[oScore, setOScore] = useState(null);
     const[spectList, setSpectList] = useState([]);
+    const[leaderboard, setLeaderboard] = useState([]);
     const winner = calculateWinner(board);
     
     function handleBoxClick(e, index){
@@ -64,12 +67,14 @@ function Game({username}) {
     useEffect(() => { 
         socket.on('playerX', data => {
             setPlayerX(data.playerX);
+            setXScore(data.score);
         });
     }, [playerX])
     
     useEffect(() => { 
         socket.on('playerO', data => {
             setPlayerO(data.playerO);
+            setOScore(data.score);
         });
     }, [playerO])
     
@@ -80,25 +85,43 @@ function Game({username}) {
         });
     }, [spectList])
     
-    useEffect(() => { 
-        socket.on('user_list', data => {
-            console.log('User list event received!');
-            console.log(data)
+    useEffect(() => {
+        socket.on('leaderboard', data => {
+            console.log('User list event received');
+            console.log(data);
+            setLeaderboard(data.users);
+        })
+    }, [])
+    
+    useEffect(() => {
+        socket.on('leaderboard', data => {
+            console.log('User list event received');
+            console.log(data);
+            setLeaderboard(data.users);
         });
     }, [])
+
     
     return (
         <div className='container'>
             <h1> Welcome {username} </h1>
             <Board squares={ board } onClick={ handleBoxClick } username={username}/>
-            <div style={ styles }>
-                <p> Player X : { playerX } </p>
-                <p> Player O : { playerO } </p>
-                <p>{ winner ? 'Winner: ' + winner : 'Next Player: ' + (xNext ? 'X' : 'O')}</p>
-                { !isSpect(username) ?
+            { !isSpect(username) ?
                 <p>{ winner ? <button onClick={ handleClear }> Play Again </button> : <button onClick={ handleClear }> Reset </button> }</p> : null }
+            <div style={ styles }>
+                <h3> Player X : { playerX } </h3>  
+                <p> Current Score : { xScore } </p> 
+                <h3> Player O : { playerO } </h3>  
+                <p> Current Score : { oScore } </p>
+            </div>
+            <div>
+                <p>{ winner ? 'Winner: ' + winner : 'Next Player: ' + (xNext ? 'X' : 'O')}</p>
                 <p> Spectators:</p>
                 { spectList.map((user, i) => ( <p> { user } </p> )) }
+            </div>
+            <div>
+                <h3> Leaderboard </h3>
+                {leaderboard.map((player, i) => ( <p> { player } </p> )) }
             </div>
         </div>
     )

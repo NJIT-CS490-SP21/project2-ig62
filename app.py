@@ -38,12 +38,7 @@ def index(filename):
 @socketio.on('connect')
 def on_connect():
     print('User connected!')
-    all_users = models.Person.query.all()
-    users = []
-    for user in all_users:
-        users.append(user.username)
-    print(users)
-    socketio.emit('user_list', {'users': users})
+
 
 @socketio.on('disconnect')
 def on_disconnect():
@@ -58,15 +53,39 @@ def on_board(data):
 def on_reset(data):
     socketio.emit('reset', {'message': 'Resetting Game'}, broadcast=True, include_self=True)
 
-@socketio.on('user')
+@socketio.on('user') #{ username: userText }
 def on_user(data):
     print(str(data))
+    exists = db.session.query(db.exists().where(models.Person.username == data['username'])).scalar()
+    if not exists:
+        new_user = models.Person(username=data['username'], score = 100)
+        db.session.add(new_user)
+        db.session.commit()
+        all_users = models.Person.query.all()
+        users = []
+        for player in all_users:
+            users.append(player.username)
+        print(users)
+        socketio.emit('leaderboard', {'users': users})
+    else:
+        # user_data = db.session.query(models.Person).get(data['username'])
+        # username = user_data.username
+        # score = user_data.score
+        all_users = models.Person.query.all()
+        users = []
+        for player in all_users:
+            users.append(player.username)
+        print(users)
+        socketio.emit('leaderboard', {'users': users})
+        
     if data['username'] not in userList:
         userList.append(data['username'])
     if len(userList) == 1:
-        socketio.emit('playerX', {'playerX': userList[0], 'username': data['username']}, broadcast=True, include_self=True)
+        user_data = models.Person.query.filter_by(username=data['username']).first()
+        socketio.emit('playerX', {'playerX': userList[0], 'username': data['username'], 'score':user_data.score}, broadcast=True, include_self=True)
     elif len(userList) == 2:
-        socketio.emit('playerO', {'playerO': userList[1], 'username': data['username']}, broadcast=True, include_self=True)
+        user_data = models.Person.query.filter_by(username=data['username']).first()
+        socketio.emit('playerO', {'playerO': userList[1], 'username': data['username'], 'score':user_data.score}, broadcast=True, include_self=True)
     else:
         for i in range(2, len(userList)):
             if userList[i] not in specList:
