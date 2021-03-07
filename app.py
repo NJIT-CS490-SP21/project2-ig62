@@ -16,7 +16,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-import models
+from models import Person
 db.create_all()
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
