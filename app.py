@@ -3,10 +3,21 @@ from flask import Flask, send_from_directory, json
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from dotenv import load_dotenv, find_dotenv
+from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
 app = Flask(__name__, static_folder='./build/static')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL') #POINT TO HEROKU DATABASE
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+import models
+db.create_all()
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(
@@ -36,7 +47,6 @@ def on_disconnect():
 def on_board(data):
     print(str(data))
     socketio.emit('board', data, broadcast=True, include_self=True)
-    socketio.emit('next', data, broadcast=True, include_self=True)
 
 @socketio.on('reset')
 def on_reset(data):
