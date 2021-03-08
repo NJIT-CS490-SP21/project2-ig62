@@ -23,10 +23,8 @@ function Game({username}) {
     const[leaderboard, setLeaderboard] = useState([]);
     const[scores, setScores] = useState([]);
     const[gameStat, setGameStat] = useState(true);
-    const[winner, setWinner] = useState(null);
-    const[loser, setLoser] = useState(null);
     const win = calculateWinner(board);
-    
+    console.log(win);
     const onClickShow = () => setShow(!show);
     
     function handleBoxClick(e, index){
@@ -42,6 +40,7 @@ function Game({username}) {
     function handleClear(){
         setBoard(Array(9).fill(null));
         setXNext(true);
+        setGameStat(true);
         socket.emit('reset', { message: "Reset/Play Again was clicked" });
     }
     
@@ -52,20 +51,15 @@ function Game({username}) {
     useEffect(() => {
         socket.on('board', data => {
             console.log('Board was clicked!');
+            console.log(win + 'here????????????????')
             console.log(data);
             const newBoard = [...board];
-            if (win || newBoard[data.index]) {
-                setGameStat(false);
-                return;
-            }
-            if (win && gameStat === false) {
-                socket.emit('game_status', { message: 'Winner has been decided'})
-            }
+            if (win || newBoard[data.index]) return;
             newBoard[data.index] = xNext ? 'X' : 'O';
             setBoard(newBoard);
             setXNext(!xNext);
         })
-    }, [board, xNext, win])
+    }, [board, xNext])
     
         
     useEffect(() => {     
@@ -98,13 +92,6 @@ function Game({username}) {
         });
     }, [spectList])
     
-    useEffect(() => {
-        socket.on('leaderboard', data => {
-            console.log('User list event received');
-            console.log(data);
-            setLeaderboard(data.users);
-        })
-    }, [])
     
     useEffect(() => {
         socket.on('leaderboard', data => {
@@ -116,20 +103,17 @@ function Game({username}) {
     }, [])
     
     useEffect(() => {
-        socket.on('get_winner', data => {
-            console.log('Winner event received');
-            console.log(data);
-            if (win === 'X'){
-                setWinner(playerX);
-                setLoser(playerO);
-            } else if (win === 'O') {
-                setWinner(playerO);
-                setLoser(playerX);
-            };
-            socket.emit('winner', { message: "Winner assigned", winner: winner, loser: loser})
-        });
+        if (win != null){
+            console.log('We have a winner')
+            if (win == 'X'){
+                socket.emit('winner', { winner: playerX, loser: playerO } )
+            } else if (win == 'O') {
+                socket.emit('winner', { winner: playerO, loser: playerX } )
+            }
+        }
     }, [win])
     
+ 
     
     return (
         <div className='container'>

@@ -50,11 +50,6 @@ def on_disconnect():
 def on_board(data):
     print(str(data))
     socketio.emit('board', data)
-    
-@socketio.on('game_status')
-def on_game_status(data):
-    print(str(data))
-    socketio.emit('get_winner', data)
 
 @socketio.on('winner')
 def on_winner(data):
