@@ -122,10 +122,8 @@ function Game({username}) {
             { !isSpect(username) ?
                 <p>{ win ? <button onClick={ handleClear }> Play Again </button> : <button onClick={ handleClear }> Reset </button> }</p> : null }
             <div style={ styles }>
-                <h3> Player X : { playerX } </h3>  
-                <p> Current Score : { xScore } </p> 
-                <h3> Player O : { playerO } </h3>  
-                <p> Current Score : { oScore } </p>
+                <h3> Player X : { playerX } </h3>
+                <h3> Player O : { playerO } </h3>
             </div>
             <div>
                 <p>{ win ? 'Winner: ' + win : 'Next Player: ' + (xNext ? 'X' : 'O')}</p>
