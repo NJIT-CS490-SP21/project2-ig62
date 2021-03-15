@@ -1,3 +1,4 @@
+"""app.py"""
 import os
 import random
 from flask import Flask, send_from_directory, json
@@ -5,63 +6,71 @@ from flask_socketio import SocketIO
 from flask_cors import CORS
 from dotenv import load_dotenv, find_dotenv
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import desc
-from dotenv import load_dotenv, find_dotenv
+import models
 
 load_dotenv(find_dotenv())
 
-app = Flask(__name__, static_folder='./build/static')
+APP = Flask(__name__, static_folder='./build/static')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL') #POINT TO HEROKU DATABASE
+APP.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    'DATABASE_URL')  #POINT TO HEROKU DATABASE
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+DB = SQLAlchemy(APP)
 
-import models
-db.create_all()
+DB.create_all()
 
-cors = CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(
-    app,
-    cors_allowed_origins="*",
-    json=json,
-    manage_session=False
-)
+CORS = CORS(APP, resources={r"/*": {"origins": "*"}})
+SOCKETIO = SocketIO(APP,
+                    cors_allowed_origins="*",
+                    json=json,
+                    manage_session=False)
 
-userList = []
-specList = []
+USER_LIST = []
+SPEC_LIST = []
 
-@app.route('/', defaults={"filename": "index.html"})
-@app.route('/<path:filename>')
+
+@APP.route('/', defaults={"filename": "index.html"})
+@APP.route('/<path:filename>')
 def index(filename):
+    """index"""
     return send_from_directory('./build', filename)
 
-@socketio.on('connect')
+
+@SOCKETIO.on('connect')
 def on_connect():
+    """on_connect"""
     print('User connected!')
 
 
-@socketio.on('disconnect')
+@SOCKETIO.on('disconnect')
 def on_disconnect():
+    """on_disconnect"""
     print('User disconnected!')
 
-@socketio.on('board')
-def on_board(data):
-    print(str(data))
-    socketio.emit('board', data)
 
-@socketio.on('winner')
-def on_winner(data):
+@SOCKETIO.on('board')
+def on_board(data):
+    """on_board"""
     print(str(data))
-    winner = db.session.query(models.Person).get(data['winner'])
-    loser = db.session.query(models.Person).get(data['loser'])
+    SOCKETIO.emit('board', data)
+
+
+@SOCKETIO.on('winner')
+def on_winner(data):
+    """on_winner"""
+    # Disable all the no-member violations in this function
+    # pylint: disable=no-member
+    print(str(data))
+    winner = DB.session.query(models.Person).get(data['winner'])
+    loser = DB.session.query(models.Person).get(data['loser'])
     print(winner.score, loser.score)
     winner.score = winner.score + 1
     loser.score = loser.score - 1
     print(winner.score, loser.score)
     print("Updating Score")
-    db.session.commit()
+    DB.session.commit()
     print("Score Updated!")
     all_users = models.Person.query.order_by(models.Person.score.desc()).all()
     users = []
@@ -71,23 +80,32 @@ def on_winner(data):
         scores.append(player.score)
     print(users)
     print(scores)
-    socketio.emit('leaderboard', {'users': users, 'scores': scores})
+    SOCKETIO.emit('leaderboard', {'users': users, 'scores': scores})
 
-@socketio.on('reset')
+
+@SOCKETIO.on('reset')
 def on_reset(data):
-    socketio.emit('reset', {'message': 'Resetting Game'})
-
-@socketio.on('user') #{ username: userText }
-def on_user(data):
+    """on_reset"""
     print(str(data))
-    exists = db.session.query(db.exists().where(models.Person.username == data['username'])).scalar()
+    SOCKETIO.emit('reset', {'message': 'Resetting Game'})
+
+
+@SOCKETIO.on('user')  #{ username: userText }
+def on_user(data):
+    """on_user"""
+    # Disable all the no-member violations in this function
+    # pylint: disable=no-member
+    print(str(data))
+    exists = DB.session.query(DB.exists().where(
+        models.Person.username == data['username'])).scalar()
     if not exists:
-        print('Adding player on db...')
+        print('Adding player on DB...')
         rand = random.randint(0, 500)
-        new_user = models.Person(id=rand,username=data['username'], score = 100)
-        db.session.add(new_user)
-        db.session.commit()
-        all_users = models.Person.query.order_by(models.Person.score.desc()).all()
+        new_user = models.Person(id=rand, username=data['username'], score=100)
+        DB.session.add(new_user)
+        DB.session.commit()
+        all_users = models.Person.query.order_by(
+            models.Person.score.desc()).all()
         users = []
         scores = []
         for player in all_users:
@@ -95,12 +113,10 @@ def on_user(data):
             scores.append(player.score)
         print(users)
         print(scores)
-        socketio.emit('leaderboard', {'users': users, 'scores': scores})
+        SOCKETIO.emit('leaderboard', {'users': users, 'scores': scores})
     else:
-        # user_data = db.session.query(models.Person).get(data['username'])
-        # username = user_data.username
-        # score = user_data.score
-        all_users = models.Person.query.order_by(models.Person.score.desc()).all()
+        all_users = models.Person.query.order_by(
+            models.Person.score.desc()).all()
         users = []
         scores = []
         for player in all_users:
@@ -108,27 +124,39 @@ def on_user(data):
             scores.append(player.score)
         print(users)
         print(scores)
-        socketio.emit('leaderboard', {'users': users, 'scores': scores})
-        
-    if data['username'] not in userList:
-        userList.append(data['username'])
-    if len(userList) == 1:
-        user_data = models.Person.query.filter_by(username=data['username']).first()
-        socketio.emit('playerX', {'playerX': userList[0], 'username': data['username'], 'score':user_data.score})
-    elif len(userList) == 2:
-        user_data = models.Person.query.filter_by(username=data['username']).first()
-        socketio.emit('playerO', {'playerO': userList[1], 'username': data['username'], 'score':user_data.score})
+        SOCKETIO.emit('leaderboard', {'users': users, 'scores': scores})
+
+    if data['username'] not in USER_LIST:
+        USER_LIST.append(data['username'])
+    if len(USER_LIST) == 1:
+        user_data = models.Person.query.filter_by(
+            username=data['username']).first()
+        SOCKETIO.emit(
+            'playerX', {
+                'playerX': USER_LIST[0],
+                'username': data['username'],
+                'score': user_data.score
+            })
+    elif len(USER_LIST) == 2:
+        user_data = models.Person.query.filter_by(
+            username=data['username']).first()
+        SOCKETIO.emit(
+            'playerO', {
+                'playerO': USER_LIST[1],
+                'username': data['username'],
+                'score': user_data.score
+            })
     else:
-        for i in range(2, len(userList)):
-            if userList[i] not in specList:
-                specList.append(userList[i])
-        print("Spect: " + str(specList))
-        socketio.emit('spectators', {'spectators': specList})
-    
-    
+        for i in range(2, len(USER_LIST)):
+            if USER_LIST[i] not in SPEC_LIST:
+                SPEC_LIST.append(USER_LIST[i])
+        print("Spect: " + str(SPEC_LIST))
+        SOCKETIO.emit('spectators', {'spectators': SPEC_LIST})
+
+
 if __name__ == "__main__":
-    socketio.run(
-        app,
+    SOCKETIO.run(
+        APP,
         host=os.getenv('IP', '0.0.0.0'),
         port=8081 if os.getenv('C9_PORT') else int(os.getenv('PORT', 8081)),
     )

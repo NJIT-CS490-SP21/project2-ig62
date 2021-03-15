@@ -105,7 +105,7 @@ function Game({username}) {
     useEffect(() => {
         if (win != null){
             console.log('We have a winner')
-            if (win == 'X'){
+            if (win == 'X'){ //additional condition username
                 socket.emit('winner', { winner: playerX, loser: playerO } )
             } else if (win == 'O') {
                 socket.emit('winner', { winner: playerO, loser: playerX } )
