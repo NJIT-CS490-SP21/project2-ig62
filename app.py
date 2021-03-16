@@ -100,17 +100,7 @@ def on_user(data):
         models.Person.username == data['username'])).scalar()
     if not exists:
         print('Adding player on DB...')
-        rand = random.randint(0, 500)
-        new_user = models.Person(id=rand, username=data['username'], score=100)
-        DB.session.add(new_user)
-        DB.session.commit()
-        all_users = models.Person.query.order_by(
-            models.Person.score.desc()).all()
-        users = []
-        scores = []
-        for player in all_users:
-            users.append(player.username)
-            scores.append(player.score)
+        users, scores = add_user(data['user'])
         print(users)
         print(scores)
         SOCKETIO.emit('leaderboard', {'users': users, 'scores': scores})
@@ -126,8 +116,8 @@ def on_user(data):
         print(scores)
         SOCKETIO.emit('leaderboard', {'users': users, 'scores': scores})
 
-    if data['username'] not in USER_LIST:
-        USER_LIST.append(data['username'])
+    add_user_to_list(data['username'])
+    
     if len(USER_LIST) == 1:
         user_data = models.Person.query.filter_by(
             username=data['username']).first()
@@ -153,6 +143,23 @@ def on_user(data):
         print("Spect: " + str(SPEC_LIST))
         SOCKETIO.emit('spectators', {'spectators': SPEC_LIST})
 
+def add_user_to_list(username):
+    if username not in USER_LIST:
+        USER_LIST.append(username)
+    return USER_LIST
+        
+def add_user(username):
+    rand = random.randint(0, 500)
+    new_user = models.Person(id=rand, username=username, score=100)
+    DB.session.add(new_user)
+    DB.session.commit()
+    all_users = models.Person.query.all()
+    users = []
+    scores = []
+    for player in all_users:
+        users.append(player.username)
+        scores.append(player.score)
+    return users, scores
 
 if __name__ == "__main__":
     SOCKETIO.run(

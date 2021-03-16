@@ -1,0 +1,3 @@
+{
+    "ignorePatterns": ["src/App.test.jsx", "src/index.jsx", "src/reportWebVitals.jsx", "src/setupTest.jsx"]
+}

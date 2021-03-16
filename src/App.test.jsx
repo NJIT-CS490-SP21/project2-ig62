@@ -1,8 +1,19 @@
-import { render, screen } from "@testing-library/react";
-import App from "./App";
+import Login from "./Login"
 
-test("renders learn react link", () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
-});
+describe('Show board test', () => {
+  test( 'showLogin to be false', () => {
+    const userNameRef = "ian"
+    expect(showLogin.toBeFalsy())
+  })
+}); 
+// test("Login Flow", () => {
+//   render(<App />);
+//   const linkElement = screen.getByText(/learn react/i);
+//   expect(linkElement).toBeInTheDocument();
+// });
+
+// test("Board Clicking", () => {
+//   render(<App />);
+//   const linkElement = screen.getByText(/learn react/i);
+//   expect(linkElement).toBeInTheDocument();
+// });
