@@ -52,7 +52,7 @@ function Game({ username }) {
     socket.emit('reset', { message: 'Reset/Play Again was clicked' });
   }
 
-  function isSpect(user) {
+  function isSpect() {
     return spectList.includes(username);
   }
 
@@ -67,7 +67,7 @@ function Game({ username }) {
   }, [board, xNext, win]);
 
   useEffect(() => {
-    socket.on('reset', (data) => {
+    socket.on('reset', () => {
       setBoard(Array(9).fill(null));
       setXNext(true);
     });
@@ -111,7 +111,7 @@ function Game({ username }) {
       }
     }
   });
-
+/* eslint-disable */
   return (
     <div className="container">
       <h1>
@@ -183,7 +183,7 @@ function Game({ username }) {
     </div>
   );
 }
-
+/* eslint-enable */
 Game.propTypes = {
   username: PropTypes.string.isRequired,
 };

@@ -1,11 +1,14 @@
-import Login from "./Login"
+import { render, screen, fireEvent } from '@testing-library/react';
+import App from './App';
 
-describe('Show board test', () => {
-  test( 'showLogin to be false', () => {
-    const userNameRef = "ian"
-    expect(showLogin.toBeFalsy())
-  })
-}); 
+test('showLogin disappears', () => {
+  const result = render(<App />);
+
+  const loginButtonElement = screen.getByText('Login');
+  expect(loginButtonElement).toBeInTheDocument();
+
+  fireEvent.click(loginButtonElement);
+});
 // test("Login Flow", () => {
 //   render(<App />);
 //   const linkElement = screen.getByText(/learn react/i);
