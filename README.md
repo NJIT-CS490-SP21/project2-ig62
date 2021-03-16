@@ -39,4 +39,7 @@ I had to write conditional statements checking if xNext is true and if username 
 
 Appending the last element instead of  resetting the spectList worked for me.
 
+### 4.  Testing Error - SyntaxError: /home/ec2-user/environment/Project 2/src/App.test.js: Support for the experimental syntax 'jsx' isn't currently enabled (5:25):
+
+Can't find a fix at this moment.
 # WIP  
